@@ -1,6 +1,13 @@
 import boto3
 print(boto3.client("ec2", region_name="us-east-1").describe_volumes(Filters=[{"Name": "status", "Values": ["available"]}])["Volumes"])
 
+ec2_client = boto3.client("ec2", region_name="us-east-1")
+regions = [r['RegionName'] for r in ec2_client.describe_regions()['Regions']]
+for region in regions:
+    volumes = boto3.client("ec2", region_name=region).describe_volumes(Filters=[{"Name": "status", "Values": ["available"]}])["Volumes"]
+    print(f"Region: {region}, Unattached Volumes: {volumes}")
+
+
 
 import boto3
 import csv
