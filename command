@@ -38,3 +38,37 @@ def get_unused_volumes(region):
     print(f"CSV report generated: unused_ebs_volumes_{region}.csv")
 
 get_unused_volumes(region)
+
+
+############################two regions ue1 and ue2 #######################
+import boto3
+import csv
+
+regions = ["us-east-1", "us-east-2"]  # List of regions to check
+
+def get_unused_volumes(regions):
+    all_volumes = []
+
+    for region in regions:
+        print(f"Checking region: {region}")
+        ec2 = boto3.client("ec2", region_name=region)
+        volumes = ec2.describe_volumes(Filters=[{"Name": "status", "Values": ["available"]}])["Volumes"]
+
+        for volume in volumes:
+            all_volumes.append({
+                "VolumeId": volume["VolumeId"],
+                "Size (GiB)": volume["Size"],
+                "Region": region
+            })
+
+    # Save to CSV
+    filename = "unused_ebs_volumes.csv"
+    with open(filename, "w", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=["VolumeId", "Size (GiB)", "Region"])
+        writer.writeheader()
+        writer.writerows(all_volumes)
+
+    print(f"CSV report generated: {filename}")
+
+get_unused_volumes(regions)
+
